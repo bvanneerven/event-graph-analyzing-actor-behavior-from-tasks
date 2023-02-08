@@ -54,14 +54,13 @@ df_show_threshold = 1.0
 print_description = False
 start_end_date = None
 # start_end_date = ['2016-01-01', '2016-06-30']
-start_end_date = ['2016-08-01', '2017-02-01']
 
 step_create_DFG_concept_drift_comparison = False
 start_end_dates = [['2016-01-01', '2016-06-30'], ['2016-08-01', '2017-02-01']]
 
 resources = None
 step_create_DFG_resource_overlaid = True
-resources = ["User_29", "User_113"]
+
 resources_lists_over = [["User_29"], ["User_113"]]
 df_show_threshold_over = 5
 df_show_threshold_under = 5
@@ -109,5 +108,8 @@ if step_create_DFG_concept_drift_comparison:
     dfg_vis.visualize_cluster_DFG_concept_drift_comparison(
         entity_type, df_show_threshold, start_end_dates)
 if step_create_DFG_resource_overlaid:
+    resources = ["User_29", "User_113"]
+    start_end_date = ['2016-08-01', '2017-02-01']
+
     dfg_vis.visualize_cluster_DFG_resources(df_show_threshold_under, df_show_threshold_over, resources_lists_over,
                                             start_end_date=start_end_date, resources=resources)
