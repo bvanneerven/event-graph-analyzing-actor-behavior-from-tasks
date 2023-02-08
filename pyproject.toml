@@ -1,0 +1,23 @@
+[tool.poetry]
+name = "event-graph-analyzing-actor-behavior-from-tasks"
+version = "0.1.0"
+description = ""
+authors = ["Your Name <you@example.com>"]
+readme = "README.md"
+packages = [{include = "event_graph_analyzing_actor_behavior_from_tasks"}]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+pandas = "^1.5.3"
+neo4j = "^5.5.0"
+matplotlib = "^3.6.3"
+scikit-learn = "^1.2.1"
+graphviz = "^0.20.1"
+palettable = "^3.3.0"
+colormap = "^1.0.4"
+easydev = "^0.12.1"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
