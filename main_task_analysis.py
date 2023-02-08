@@ -24,8 +24,8 @@ ac = AnalysisConfigurator(pattern_subset_description)
 # -------------- CONSTRUCTION ----------------- #
 # IF STARTING FROM SCRATCH (without event graph constructed in neo4j)
 # (1) set "step_preprocess" and "step_create_event_graph" to true:
-step_preprocess = True
-step_create_event_graph = True
+step_preprocess = False
+step_create_event_graph = False
 # (2) create graph in Neo4j (with same password as specified in "graph_confs.py")
 #     and allocate enough memory: set dbms.memory.heap.max_size=20G
 # (3) specify path to import directory of neo4j database:
@@ -33,14 +33,14 @@ path_to_neo4j_import_directory = 'C:/Users/Bram/.Neo4jDesktop/relate-data/dbmss/
 
 # IF STARTING FROM SCRATCH OR FROM AN EVENT GRAPH PRECONSTRUCTED:
 # set "step_construct_high_level_events" to true to construct high level events:
-step_construct_high_level_events = True
+step_construct_high_level_events = False
 
 # IF ALSO CREATING EVENT CLASS AND TASK INSTANCE CLASS CONSTRUCTS (necessary for analyzing atomic-composite granularity):
-step_construct_classes = False
+step_construct_classes = True
 
-step_construct_clusters = False
+step_construct_clusters = True
 
-step_construct_artificial = False
+step_construct_artificial = True
 
 # -------------- TASK ANALYSIS ---------------- #
 # IF EVENT GRAPH, HIGH LEVEL EVENTS, CLASS- AND CLUSTER CONSTRUCTS ARE ALREADY IN PLACE:
@@ -83,10 +83,9 @@ if step_construct_classes:
     ), graph, gc.get_entity_labels(), gc.get_action_lifecycle_labels())
     class_constr.construct_action_classes()
 
-ta = TaskAnalyzer(graph, gc.get_password(), ac.get_analysis_directory(), ac.get_pattern_filter_description(),
-                  ac.get_pattern_filter_cypher(), ac.get_encoding(), ac.get_num_clusters())
-
 if step_construct_clusters:
+    ta = TaskAnalyzer(graph, gc.get_password(), ac.get_analysis_directory(), ac.get_pattern_filter_description(),
+                      ac.get_pattern_filter_cypher(), ac.get_encoding(), ac.get_num_clusters())
     ClusterConstructor(gc.get_password(), graph, gc.get_entity_labels(), gc.get_action_lifecycle_labels()) \
         .construct_clusters(ta.get_patterns_clustered(), ac.get_num_clusters())
 
