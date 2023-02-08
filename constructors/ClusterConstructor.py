@@ -32,12 +32,15 @@ class ClusterConstructor:
                 WITH DISTINCT ti.cluster AS cluster, count(*) AS cluster_count
                 MERGE (tc:TaskCluster {{Name:cluster, count:cluster_count}})'''
         run_query(self.driver, query_create_cluster_nodes)
+        pr.record_performance('create_cluster_nodes')
+
         # link task instance nodes to corresponding cluster nodes
         query_link_task_instances_to_clusters = f'''
                 MATCH (tc:TaskCluster)
                 MATCH (ti:TaskInstance) WHERE ti.cluster = tc.Name
                 CREATE (ti)-[:OBSERVED]->(tc)'''
         run_query(self.driver, query_link_task_instances_to_clusters)
+        pr.record_performance('link_task_instances_to_cluster_nodes')
 
         for entity in self.entity_labels:
             # aggregate DF-relationships between clusters
@@ -48,6 +51,7 @@ class ClusterConstructor:
                 WITH n.EntityType as EType, tc1, count(df) AS df_freq, tc2
                 MERGE (tc1)-[rel2:DF_TC{{EntityType:EType}}]->(tc2) ON CREATE SET rel2.count=df_freq'''
             run_query(self.driver, query_aggregate_directly_follows_clusters)
+        pr.record_performance('aggregate_DF_relationships_between_clusters')
 
         # create artificial start and end nodes
         query_create_artificial_start_and_end = f'''
@@ -55,6 +59,7 @@ class ClusterConstructor:
             CREATE (:TaskCluster {{Name:"end"}})
             '''
         run_query(self.driver, query_create_artificial_start_and_end)
+        pr.record_performance('create_artificial_start_and_end_nodes')
 
         # connect artificial start and end for case perspective
         query_connect_artificial_start_case = f'''
@@ -75,6 +80,8 @@ class ClusterConstructor:
             MERGE (tc)-[df:DF_TC {{EntityType:"case", count:count}}]->(end)
             '''
         run_query(self.driver, query_connect_artificial_end_case)
+        pr.record_performance(
+            'connect_artificial_start_and_end_for_case_perspective')
 
         # connect artificial start and end for resource perspective
         query_connect_artificial_start_resource = f'''
@@ -98,8 +105,10 @@ class ClusterConstructor:
             MERGE (tc)-[df:DF_TC {{EntityType:"resource", count:count}}]->(end)
                         '''
         run_query(self.driver, query_connect_artificial_end_resource)
+        pr.record_performance(
+            'connect_artificial_start_and_end_for_resource_perspective')
 
-        print("COMPLETED constructing clusters")
+        pr.record_total_performance()
 
 
 def run_query(driver, query):
