@@ -36,9 +36,11 @@ path_to_neo4j_import_directory = 'C:/Users/Bram/.Neo4jDesktop/relate-data/dbmss/
 step_construct_high_level_events = False
 
 # IF ALSO CREATING EVENT CLASS AND TASK INSTANCE CLASS CONSTRUCTS (necessary for analyzing atomic-composite granularity):
-step_construct_classes = True
+step_construct_classes = False
 
-step_construct_clusters = True
+step_construct_task_instance_classes = False
+
+step_construct_clusters = False
 
 step_construct_artificial = True
 
@@ -83,9 +85,15 @@ if step_construct_classes:
     ), graph, gc.get_entity_labels(), gc.get_action_lifecycle_labels())
     class_constr.construct_action_classes()
 
+if step_construct_task_instance_classes:
+    class_constr = ClassConstructor(gc.get_password(
+    ), graph, gc.get_entity_labels(), gc.get_action_lifecycle_labels())
+    class_constr.construct_task_instance_classes()
+
 if step_construct_clusters:
     ta = TaskAnalyzer(graph, gc.get_password(), ac.get_analysis_directory(), ac.get_pattern_filter_description(),
                       ac.get_pattern_filter_cypher(), ac.get_encoding(), ac.get_num_clusters())
+
     ClusterConstructor(gc.get_password(), graph, gc.get_entity_labels(), gc.get_action_lifecycle_labels()) \
         .construct_clusters(ta.get_patterns_clustered(), ac.get_num_clusters())
 
