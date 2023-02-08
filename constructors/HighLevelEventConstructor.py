@@ -5,7 +5,8 @@ from neo4j import GraphDatabase
 class HighLevelEventConstructor:
 
     def __init__(self, password, name_data_set, entity_labels, action_lifecycle_label):
-        self.driver = GraphDatabase.driver("bolt://localhost:7687", auth=("neo4j", password))
+        self.driver = GraphDatabase.driver(
+            "bolt://localhost:7687", auth=("neo4j", password))
         self.name_data_set = name_data_set
         self.entity_labels = entity_labels
         self.entity_labels[0].append('rID')
@@ -16,7 +17,8 @@ class HighLevelEventConstructor:
 
     def construct_single(self):
         # create performance recorder
-        pr = PerformanceRecorder(self.name_data_set, 'constructing_task_instance_nodes')
+        pr = PerformanceRecorder(
+            self.name_data_set, 'constructing_task_instance_nodes')
         # combine resource and case directly follows relationships
         query_combine_df_joint = f'''
             MATCH (e1:Event)-[:DF {{EntityType:'{self.entity_labels[0][0]}'}}]->(e2:Event)
@@ -44,7 +46,7 @@ class HighLevelEventConstructor:
             MATCH p=(e1)-[:DF*]->(e2) WHERE all(r in relationships(p) WHERE (r.EntityType = 'joint'))
             RETURN p, e1, e2
             UNION
-            MATCH (e:Event) WHERE exists(e.{self.entity_labels[0][1]})
+            MATCH (e:Event) WHERE e.{self.entity_labels[0][1]} IS NOT NULL
             AND NOT ()-[:DF {{EntityType:'joint'}}]->(e) AND NOT (e)-[:DF {{EntityType:'joint'}}]->()
             MATCH p=(e) RETURN p, e AS e1, e AS e2
             }}
@@ -89,7 +91,8 @@ class HighLevelEventConstructor:
     def construct_multi(self, max_cases, max_resources):
         self.max_cases = max_cases
         self.max_resources = max_resources
-        pr = PerformanceRecorder(self.name_data_set, 'constructing_high_level_event_nodes')
+        pr = PerformanceRecorder(
+            self.name_data_set, 'constructing_high_level_event_nodes')
         # aggregate resource DF-relationships and record the count
         query_combine_df_resource_joint = f'''
             MATCH (e1:Event)-[df_r:DF {{EntityType: "{self.entity_labels[0][0]}"}}]->(e2:Event)

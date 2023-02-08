@@ -6,7 +6,8 @@ from neo4j import GraphDatabase
 class ClusterConstructor:
 
     def __init__(self, password, name_data_set, entity_labels, action_lifecycle_label):
-        self.driver = GraphDatabase.driver("bolt://localhost:7687", auth=("neo4j", password))
+        self.driver = GraphDatabase.driver(
+            "bolt://localhost:7687", auth=("neo4j", password))
         self.name_data_set = name_data_set
         self.entity_labels = entity_labels
         self.entity_labels[0].append('rID')
@@ -27,7 +28,7 @@ class ClusterConstructor:
 
         # create cluster nodes
         query_create_cluster_nodes = f'''
-                MATCH (ti:TaskInstance) WHERE EXISTS(ti.cluster) 
+                MATCH (ti:TaskInstance) WHERE ti.cluster IS NOT NULL 
                 WITH DISTINCT ti.cluster AS cluster, count(*) AS cluster_count
                 MERGE (tc:TaskCluster {{Name:cluster, count:cluster_count}})'''
         run_query(self.driver, query_create_cluster_nodes)
@@ -78,7 +79,7 @@ class ClusterConstructor:
         # connect artificial start and end for resource perspective
         query_connect_artificial_start_resource = f'''
             MATCH (ti0:TaskInstance)-[df:DF_TI {{EntityType:"resource"}}]->(ti1:TaskInstance) 
-                WHERE NOT date(ti0.end_time) = date(ti1.start_time) AND EXISTS(ti1.cluster)
+                WHERE NOT date(ti0.end_time) = date(ti1.start_time) AND ti1.cluster IS NOT NULL
             WITH DISTINCT ti1.cluster AS cluster, count(*) AS count
             MATCH (tc:TaskCluster {{Name:cluster}})
             WITH tc, count
@@ -88,7 +89,7 @@ class ClusterConstructor:
             '''
         run_query(self.driver, query_connect_artificial_start_resource)
         query_connect_artificial_end_resource = f'''
-            MATCH (ti0:TaskInstance)-[df:DF_TI {{EntityType:"resource"}}]->(ti1:TaskInstance) WHERE NOT date(ti0.end_time) = date(ti1.start_time) AND EXISTS(ti0.cluster)
+            MATCH (ti0:TaskInstance)-[df:DF_TI {{EntityType:"resource"}}]->(ti1:TaskInstance) WHERE NOT date(ti0.end_time) = date(ti1.start_time) AND ti0.cluster IS NOT NULL
             WITH DISTINCT ti0.cluster AS cluster, count(*) AS count
             MATCH (tc:TaskCluster {{Name:cluster}})
             WITH tc, count

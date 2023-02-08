@@ -6,7 +6,8 @@ from neo4j import GraphDatabase
 class EventGraphConstructor:
 
     def __init__(self, password, import_directory, filename):
-        self.driver = GraphDatabase.driver("bolt://localhost:7687", auth=("neo4j", password))
+        self.driver = GraphDatabase.driver(
+            "bolt://localhost:7687", auth=("neo4j", password))
         self.filename = filename
         self.file_name = f'{filename}.csv'
         self.csv_data_set = pd.read_csv(f'{import_directory}{filename}.csv')
@@ -15,8 +16,9 @@ class EventGraphConstructor:
 
     def construct_single(self):
         pr = PerformanceRecorder(self.filename, 'constructing_event_graph')
-        query_create_event_nodes = f'USING PERIODIC COMMIT LOAD CSV WITH HEADERS ' \
-                                   f'FROM \"file:///{self.file_name}\" as line'
+        query_create_event_nodes = f'LOAD CSV WITH HEADERS ' \
+                                   f'FROM \"file:///{self.file_name}\" AS line ' \
+                                   r'CALL { WITH line '
         for attr in self.event_attributes:
             if attr == 'idx':
                 value = f'toInteger(line.{attr})'
@@ -31,6 +33,10 @@ class EventGraphConstructor:
             else:
                 new_line = f' {attr}: {value},'
             query_create_event_nodes = query_create_event_nodes + new_line
+
+        new_line = r'} IN TRANSACTIONS OF 100 ROWS'
+        query_create_event_nodes += new_line
+
         run_query(self.driver, query_create_event_nodes)
         pr.record_performance("import_event_nodes")
 
@@ -48,7 +54,7 @@ class EventGraphConstructor:
             pr.record_performance(f"create_entity_nodes_({entity})")
 
             query_correlate_events_to_entity = f'''
-                MATCH (e:Event) WHERE EXISTS(e.{entity})
+                MATCH (e:Event) WHERE e.{entity} IS NOT NULL
                 MATCH (n:Entity {{EntityType: "{entity}"}}) WHERE e.{entity} = n.ID
                 CREATE (e)-[:CORR]->(n)'''
             run_query(self.driver, query_correlate_events_to_entity)
@@ -71,8 +77,9 @@ class EventGraphConstructor:
         self.case_cols = case_cols
         self.resource_cols = resource_cols
         pr = PerformanceRecorder(self.filename, 'constructing_event_graph')
-        query_create_event_nodes = f'USING PERIODIC COMMIT LOAD CSV WITH HEADERS ' \
-                                   f'FROM \"file:///{self.file_name}\" as line'
+        query_create_event_nodes = f'LOAD CSV WITH HEADERS ' \
+                                   f'FROM \"file:///{self.file_name}\" AS line ' \
+                                   r'CALL {' \
 
         resource_list_string = "["
         for resource in self.resource_cols:
@@ -134,6 +141,10 @@ class EventGraphConstructor:
                 else:
                     new_line = f' {attr_name}: {value},'
                 query_create_event_nodes = query_create_event_nodes + new_line
+
+        new_line = r'} IN TRANSACTIONS OF 100 ROWS'
+        query_create_event_nodes += new_line
+
         run_query(self.driver, query_create_event_nodes)
         # print(query_create_event_nodes)
         pr.record_performance("import_event_nodes")

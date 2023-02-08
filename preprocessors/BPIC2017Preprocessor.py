@@ -16,13 +16,15 @@ class BPIC2017Preprocessor(GeneralPreprocessor.GeneralPreprocessor):
         self.csv_data_set.reset_index(drop=True, inplace=True)
 
         if self.use_sample:
-            self.csv_data_set = self.csv_data_set[self.csv_data_set['case'].isin(self.sample_cases)]
+            self.csv_data_set = self.csv_data_set[self.csv_data_set['case'].isin(
+                self.sample_cases)]
 
         self.csv_data_set.rename(columns={self.column_names[0]: "case", self.column_names[1]: "activity",
                                           self.column_names[2]: "timestamp", self.column_names[3]: "resource",
                                           self.column_names[4]: "lifecycle"}, inplace=True)
 
-        self.csv_data_set['timestamp'] = pd.to_datetime(self.csv_data_set['timestamp'], format=self.timestamp_format)
+        self.csv_data_set['timestamp'] = pd.to_datetime(
+            self.csv_data_set['timestamp'], format=self.timestamp_format)
         self.csv_data_set.fillna(0)
         self.csv_data_set.sort_values(['case', 'timestamp'], inplace=True)
         self.csv_data_set['timestamp'] = self.csv_data_set['timestamp'].map(

@@ -29,18 +29,18 @@ step_create_event_graph = True
 # (2) create graph in Neo4j (with same password as specified in "graph_confs.py")
 #     and allocate enough memory: set dbms.memory.heap.max_size=20G
 # (3) specify path to import directory of neo4j database:
-path_to_neo4j_import_directory = r'C:\Users\Bram\.Neo4jDesktop\relate-data\dbmss\dbms-d5acf54e-d8e1-421a-b4e0-7b887f3479cf\import'
+path_to_neo4j_import_directory = 'C:/Users/Bram/.Neo4jDesktop/relate-data/dbmss/dbms-d5acf54e-d8e1-421a-b4e0-7b887f3479cf/import/'
 
 # IF STARTING FROM SCRATCH OR FROM AN EVENT GRAPH PRECONSTRUCTED:
 # set "step_construct_high_level_events" to true to construct high level events:
 step_construct_high_level_events = True
 
 # IF ALSO CREATING EVENT CLASS AND TASK INSTANCE CLASS CONSTRUCTS (necessary for analyzing atomic-composite granularity):
-step_construct_classes = True
+step_construct_classes = False
 
-step_construct_clusters = True
+step_construct_clusters = False
 
-step_construct_artificial = True
+step_construct_artificial = False
 
 # -------------- TASK ANALYSIS ---------------- #
 # IF EVENT GRAPH, HIGH LEVEL EVENTS, CLASS- AND CLUSTER CONSTRUCTS ARE ALREADY IN PLACE:

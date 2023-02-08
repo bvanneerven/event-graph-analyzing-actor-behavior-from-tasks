@@ -7,9 +7,9 @@ from sklearn.cluster import AgglomerativeClustering
 
 class Clusterer:
 
-    def __init__(self, show_dendrogram=False, affinity="euclidean", linkage="ward"):
+    def __init__(self, show_dendrogram=False, metric="euclidean", linkage="ward"):
         self.show_dendrogram = show_dendrogram
-        self.affinity = affinity
+        self.metric = metric
         self.linkage = linkage
 
     # def cluster_task_variants_agglomerative(self, df_task_variants, df_task_variants_encoded):
@@ -40,7 +40,7 @@ class Clusterer:
         else:
             num_clusters = num_clusters
 
-        clusters = AgglomerativeClustering(n_clusters=num_clusters, affinity=self.affinity, linkage=self.linkage) \
+        clusters = AgglomerativeClustering(n_clusters=num_clusters, metric=self.metric, linkage=self.linkage) \
             .fit_predict(df_task_variants_encoded.values)
         # df_task_variants_clustered = df_task_variants.copy()
         index = list(df_task_variants_encoded.index.values)
@@ -53,7 +53,8 @@ class Clusterer:
         return df_clusters, num_clusters
 
     def get_silhouette_score(self, df_task_variants_encoded, num_clusters):
-        clusters = AgglomerativeClustering(n_clusters=num_clusters, affinity=self.affinity, linkage=self.linkage) \
+        clusters = AgglomerativeClustering(n_clusters=num_clusters, metric=self.metric, linkage=self.linkage) \
             .fit_predict(df_task_variants_encoded.values)
-        s_score = metrics.silhouette_score(df_task_variants_encoded.values, clusters)
+        s_score = metrics.silhouette_score(
+            df_task_variants_encoded.values, clusters)
         return s_score
