@@ -42,26 +42,26 @@ step_construct_task_instance_classes = False
 
 step_construct_clusters = False
 
-step_construct_artificial = True
+step_construct_artificial = False
 
 # -------------- TASK ANALYSIS ---------------- #
 # IF EVENT GRAPH, HIGH LEVEL EVENTS, CLASS- AND CLUSTER CONSTRUCTS ARE ALREADY IN PLACE:
-step_create_intra_task_DFG = True
+step_create_intra_task_DFG = False
 
-step_create_DFG_clusters = True
+step_create_DFG_clusters = False
 entity_type = 'case'
 df_show_threshold = 1.0
 print_description = False
 start_end_date = None
 # start_end_date = ['2016-01-01', '2016-06-30']
-# start_end_date = ['2016-08-01', '2017-02-01']
+start_end_date = ['2016-08-01', '2017-02-01']
 
 step_create_DFG_concept_drift_comparison = False
 start_end_dates = [['2016-01-01', '2016-06-30'], ['2016-08-01', '2017-02-01']]
 
 resources = None
-step_create_DFG_resource_overlaid = False
-# resources = ["User_29", "User_113"]
+step_create_DFG_resource_overlaid = True
+resources = ["User_29", "User_113"]
 resources_lists_over = [["User_29"], ["User_113"]]
 df_show_threshold_over = 5
 df_show_threshold_under = 5
