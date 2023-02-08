@@ -46,9 +46,9 @@ step_construct_artificial = True
 
 # -------------- TASK ANALYSIS ---------------- #
 # IF EVENT GRAPH, HIGH LEVEL EVENTS, CLASS- AND CLUSTER CONSTRUCTS ARE ALREADY IN PLACE:
-step_create_intra_task_DFG = False
+step_create_intra_task_DFG = True
 
-step_create_DFG_clusters = False
+step_create_DFG_clusters = True
 entity_type = 'case'
 df_show_threshold = 1.0
 print_description = False

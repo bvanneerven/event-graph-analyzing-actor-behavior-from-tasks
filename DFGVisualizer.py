@@ -33,9 +33,9 @@ color_dict = {'resource': {'medium': '#d73027',  # red
                          'light_grey': '#cbbad4',
                          'medium_grey': '#9e8ca8'},
               'grey': {'medium': '#3d3d3d',  # grey
-                         'dark': '#000000',
-                         'light_grey': '#bcbcbc',
-                         'medium_grey': '#a9a9a9'},
+                       'dark': '#000000',
+                       'light_grey': '#bcbcbc',
+                       'medium_grey': '#a9a9a9'},
               1: {'medium': '#1b9e77',  # forest green
                   'dark': '#0c5741',
                   'light_grey': '#bed4ce',
@@ -63,71 +63,87 @@ class DFGVisualizer:
 
     def __init__(self, graph, password, name_data_set, entity_labels, action_lifecycle_labels, analysis_directory,
                  exclude_clusters=None):
-        self.driver = GraphDatabase.driver("bolt://localhost:7687", auth=("neo4j", password))
+        self.driver = GraphDatabase.driver(
+            "bolt://localhost:7687", auth=("neo4j", password))
         self.graph = graph
         self.name_data_set = name_data_set
         self.entity_labels = entity_labels
         self.action_lifecycle_labels = action_lifecycle_labels
         self.analysis_directory = analysis_directory
-        self.cluster_descriptions = data_set_dictionaries.cluster_descriptions[self.name_data_set]
+        self.cluster_descriptions = data_set_dictionaries.cluster_descriptions[
+            self.name_data_set]
         self.abbr_dict_lpm = data_set_dictionaries.abbr_dict_lpm_2[self.name_data_set]
         self.exclude_clusters = exclude_clusters
 
     def visualize_intra_cluster_graph(self, cluster):
         dot = Digraph(comment='Query Result')
-        dot.attr("graph", rankdir="LR", margin="0", ranksep="2.0", nodesep="1.0")
+        dot.attr("graph", rankdir="LR", margin="0",
+                 ranksep="2.0", nodesep="1.0")
         with self.driver.session() as session:
             session.read_transaction(self.get_intra_cluster_DFG, dot, cluster)
-        output_directory = os.path.join(self.analysis_directory, "DFGs", "DFG_inter_cluster")
+        output_directory = os.path.join(
+            self.analysis_directory, "DFGs", "DFG_inter_cluster")
         os.makedirs(output_directory, exist_ok=True)
-        dot.render(f'{output_directory}\\DFG_inter_cluster_{cluster}', view=True)
+        dot.render(
+            f'{output_directory}\\DFG_inter_cluster_{cluster}', view=True)
 
     def visualize_cluster_DFG(self, entity_type, df_show_threshold, start_end_date=None, resources=None,
                               print_description=False):
         dot = Digraph(comment='Query Result')
-        dot.attr("graph", rankdir="LR", margin="0", ranksep="1.5", nodesep="0.5")
+        dot.attr("graph", rankdir="LR", margin="0",
+                 ranksep="1.5", nodesep="0.5")
         with self.driver.session() as session:
             dfg_id = 0
-            task_instance_ids = session.read_transaction(get_task_instance_ids, start_end_date, resources)
+            task_instance_ids = session.read_transaction(
+                get_task_instance_ids, start_end_date, resources)
             session.read_transaction(self.get_DFG, dot, dfg_id, task_instance_ids, entity_type, df_show_threshold,
                                      print_description=print_description)
-        output_directory = os.path.join(self.analysis_directory, "DFGs", "DFG_clusters")
+        output_directory = os.path.join(
+            self.analysis_directory, "DFGs", "DFG_clusters")
         os.makedirs(output_directory, exist_ok=True)
         dot.render(f'{output_directory}\\DFG_{entity_type}_{df_show_threshold}'
                    f'{get_file_name_resources(resources)}{get_file_name_time_frame(start_end_date)}', view=True)
 
     def visualize_cluster_DFG_concept_drift_comparison(self, entity_type, df_show_threshold, start_end_dates):
         dot = Digraph(comment='Query Result')
-        dot.attr("graph", rankdir="LR", margin="0", ranksep="1.0", nodesep="0.5")
+        dot.attr("graph", rankdir="LR", margin="0",
+                 ranksep="1.0", nodesep="0.5")
         with self.driver.session() as session:
             dfg_id = 0
             task_instance_ids_before = session.read_transaction(get_task_instance_ids,
                                                                 start_end_date=start_end_dates[0])
-            task_instance_ids_after = session.read_transaction(get_task_instance_ids, start_end_date=start_end_dates[1])
+            task_instance_ids_after = session.read_transaction(
+                get_task_instance_ids, start_end_date=start_end_dates[1])
             session.read_transaction(self.get_DFG_concept_drift_comparison, dot, dfg_id, task_instance_ids_before,
                                      task_instance_ids_after,
                                      entity_type, df_show_threshold)
-        output_directory = os.path.join(self.analysis_directory, "DFGs", "DFG_clusters")
+        output_directory = os.path.join(
+            self.analysis_directory, "DFGs", "DFG_clusters")
         os.makedirs(output_directory, exist_ok=True)
-        dot.render(f'{output_directory}\\DFG_concept_drift_comparison_{df_show_threshold}', view=True)
+        dot.render(
+            f'{output_directory}\\DFG_concept_drift_comparison_{df_show_threshold}', view=True)
 
     def visualize_cluster_DFG_resources(self, df_show_threshold_case, df_show_threshold_resource, resources_lists_over,
                                         start_end_date=None, resources=None):
         dot = Digraph(comment='Query Result')
-        dot.attr("graph", rankdir="LR", margin="0", ranksep="3.0", nodesep="0.5")
+        dot.attr("graph", rankdir="LR", margin="0",
+                 ranksep="3.0", nodesep="0.5")
         with self.driver.session() as session:
             dfg_id = 0
             dfg_ids = [dfg_id]
-            task_instance_ids = session.read_transaction(get_task_instance_ids, start_end_date, resources)
+            task_instance_ids = session.read_transaction(
+                get_task_instance_ids, start_end_date, resources)
             list_task_instance_ids = [task_instance_ids]
             for resource_list in resources_lists_over:
                 dfg_id += 1
                 dfg_ids.append(dfg_id)
-                task_instance_ids = session.read_transaction(get_task_instance_ids, start_end_date, resource_list)
+                task_instance_ids = session.read_transaction(
+                    get_task_instance_ids, start_end_date, resource_list)
                 list_task_instance_ids.append(task_instance_ids)
             session.read_transaction(self.get_DFG_resources_overlaid, dot, dfg_ids, list_task_instance_ids,
                                      df_show_threshold_case, df_show_threshold_resource, resources_lists_over)
-        output_directory = os.path.join(self.analysis_directory, "DFGs", "DFG_clusters")
+        output_directory = os.path.join(
+            self.analysis_directory, "DFGs", "DFG_clusters")
         os.makedirs(output_directory, exist_ok=True)
         dot.render(
             f'{output_directory}\\DFG_resources_overlaid_{df_show_threshold_case}_{get_file_name_time_frame(start_end_date)}{get_file_name_resources(resources)}_{df_show_threshold_resource}',
@@ -146,7 +162,8 @@ class DFGVisualizer:
         node_results, log_min_node_freq, log_max_node_freq = self.query_DFG_nodes_min_max_absolute(tx,
                                                                                                    task_instance_ids)
         pr.record_performance("query_nodes")
-        edge_results = self.query_DFG_edges_absolute(tx, task_instance_ids, entity_type)
+        edge_results = self.query_DFG_edges_absolute(
+            tx, task_instance_ids, entity_type)
         pr.record_performance("query_edges")
         start_edge_results, end_edge_results = self.query_DFG_start_and_end_absolute(tx, task_instance_ids, entity_type,
                                                                                      dfg_id)
@@ -154,7 +171,8 @@ class DFGVisualizer:
         edge_results.extend(start_edge_results)
         edge_results.extend(end_edge_results)
 
-        edge_frequencies_absolute = list_edge_frequencies(edge_results, 'abs_freq')
+        edge_frequencies_absolute = list_edge_frequencies(
+            edge_results, 'abs_freq')
 
         # edge_show_threshold = get_edge_cutoff(edge_frequencies_absolute, df_show_threshold)
         edge_show_threshold = 0
@@ -168,7 +186,7 @@ class DFGVisualizer:
         end_count = 0
         for record in edge_results:
             if record['abs_freq'] > edge_show_threshold:
-            # if df_show_threshold == 1 or record['abs_freq'] > edge_show_threshold:
+                # if df_show_threshold == 1 or record['abs_freq'] > edge_show_threshold:
                 n1_id = f"{record['n1']}"
                 n2_id = f"{record['n2']}"
                 if n1_id[:5] == 'start':
@@ -186,7 +204,8 @@ class DFGVisualizer:
                 else:
                     edge_label = ""
                     edge_color = 'lightgrey'
-                dot.edge(n1_id, n2_id, xlabel=edge_label, penwidth=f"{edge_weight}", color=edge_color, fontcolor=edge_font_color)
+                dot.edge(n1_id, n2_id, xlabel=edge_label,
+                         penwidth=f"{edge_weight}", color=edge_color, fontcolor=edge_font_color)
         node_ids = set(node_ids)
         pr.record_performance("draw_edges")
 
@@ -199,9 +218,12 @@ class DFGVisualizer:
                     node_description = f"<<b>C{int(record['cluster'])}</b><br/><FONT POINT-SIZE=\"{str(font_size_small)}\">{record['abs_freq']}</FONT>>"
                 node_fill_color, node_font_color = get_node_colors(record['abs_freq'], log_min_node_freq,
                                                                    log_max_node_freq)
-                dot.node(node_id, node_description, fillcolor=node_fill_color, fontcolor=node_font_color)
-        dot.node(f"start_{dfg_id}", f"<<b>start</b><br/><FONT POINT-SIZE=\"{str(font_size_small)}\">{start_count}</FONT>>", node='source')
-        dot.node(f"end_{dfg_id}", f"<<b>end</b><br/><FONT POINT-SIZE=\"{str(font_size_small)}\">{end_count}</FONT>>", node='sink')
+                dot.node(node_id, node_description,
+                         fillcolor=node_fill_color, fontcolor=node_font_color)
+        dot.node(
+            f"start_{dfg_id}", f"<<b>start</b><br/><FONT POINT-SIZE=\"{str(font_size_small)}\">{start_count}</FONT>>", node='source')
+        dot.node(
+            f"end_{dfg_id}", f"<<b>end</b><br/><FONT POINT-SIZE=\"{str(font_size_small)}\">{end_count}</FONT>>", node='sink')
         pr.record_performance("draw_nodes")
         return dot
 
@@ -237,7 +259,8 @@ class DFGVisualizer:
         min_perc_case_diff = 0.02
         min_rel_perc_case_diff = 1.0
         edge_max_freq_abs = max(df_edge_results_joint['sum_freq'].tolist())
-        log_min_edge_freq, log_max_edge_freq = get_edge_log_min_max(edge_show_threshold_abs, edge_max_freq_abs)
+        log_min_edge_freq, log_max_edge_freq = get_edge_log_min_max(
+            edge_show_threshold_abs, edge_max_freq_abs)
         pr.record_performance("calculate_parameters")
 
         node_ids = []
@@ -249,8 +272,9 @@ class DFGVisualizer:
                 edge_weight = get_edge_weight(row['sum_freq'], edge_show_threshold_abs, log_min_edge_freq,
                                               log_max_edge_freq)
                 if row['sum_freq'] >= edge_color_threshold_abs and not min_perc_case_diff * -1.0 < row[
-                    'percentage_difference'] < min_perc_case_diff:
-                    edge_color, edge_font_color = get_colors_comparison(row['percentage_difference'], abs_max)
+                        'percentage_difference'] < min_perc_case_diff:
+                    edge_color, edge_font_color = get_colors_comparison(
+                        row['percentage_difference'], abs_max)
                     count_before = int(row['before_freq'])
                     count_after = int(row['after_freq'])
                     count_difference = count_after - count_before
@@ -261,7 +285,8 @@ class DFGVisualizer:
                     dot.edge(n1_id, n2_id, xlabel=f'{int(row["before_freq"])}\n{count_difference_string}',
                              penwidth=f"{edge_weight}", color=edge_color, fontcolor=edge_font_color)
                 else:
-                    dot.edge(n1_id, n2_id, penwidth=f"{edge_weight}", color='lightgrey')
+                    dot.edge(n1_id, n2_id,
+                             penwidth=f"{edge_weight}", color='lightgrey')
         node_ids = set(node_ids)
 
         for index, row in df_node_results_joint.iterrows():
@@ -280,13 +305,15 @@ class DFGVisualizer:
                 else:
                     freq_font_color = dark_grey
                     if not min_perc_case_diff * -1.0 < row['percentage_difference'] < min_perc_case_diff:
-                        node_fill_color, _ = get_colors_comparison(row['percentage_difference'], abs_max)
+                        node_fill_color, _ = get_colors_comparison(
+                            row['percentage_difference'], abs_max)
                         freq_font_color = black
                         if abs(row['percentage_difference']) > 0.7 * abs_max:
                             node_font_color = white
                             freq_font_color = white
                     node_description = f"<<b>C{int(row['cluster'])}</b><br/><FONT COLOR=\"{freq_font_color}\" POINT-SIZE=\"{str(font_size_small)}\">{int(row['before_freq'])}<br/>{count_difference_string}</FONT>>"
-                dot.node(node_id, node_description, fillcolor=node_fill_color, fontcolor=node_font_color)
+                dot.node(node_id, node_description,
+                         fillcolor=node_fill_color, fontcolor=node_font_color)
         pr.record_performance('draw_nodes')
         print_cmap(abs_max, min_perc_case_diff)
         return dot
@@ -306,19 +333,21 @@ class DFGVisualizer:
                                                                                                             'resource',
                                                                                                             dfg_ids[1:],
                                                                                                             list_task_instance_ids[
-                                                                                                            1:])
+                                                                                                                1:])
         df_edge_results_under, _ = self.get_edge_and_node_results_joint_resource_specific(tx, 'case', dfg_ids[:1],
                                                                                           list_task_instance_ids[:1],
                                                                                           include_start_end_nodes=False)
         pr.record_performance("query_nodes_and_edges")
 
-        df_edge_results_all = df_edge_results_over.append(df_edge_results_under)
+        df_edge_results_all = pd.concat(
+            [df_edge_results_over, df_edge_results_under])
 
         # max_edge_frequency = max(max(df_edge_results_over['abs_freq'].tolist()), max(df_edge_results_under['abs_freq'].tolist()))
         max_edge_frequency = max(df_edge_results_all['abs_freq'].tolist())
         df_show_threshold = 1.1
         # df_show_threshold = min(df_show_threshold_resource, df_show_threshold_case)
-        log_min_edge_freq, log_max_edge_freq = get_edge_log_min_max(df_show_threshold, max_edge_frequency)
+        log_min_edge_freq, log_max_edge_freq = get_edge_log_min_max(
+            df_show_threshold, max_edge_frequency)
         pr.record_performance("calculate_parameters")
 
         node_ids = []
@@ -328,7 +357,8 @@ class DFGVisualizer:
                 n1_id = str(row['n1'])
                 n2_id = str(row['n2'])
                 node_ids.extend([n1_id, n2_id])
-                edge_weight = get_edge_weight(row['abs_freq'], df_show_threshold, log_min_edge_freq, log_max_edge_freq)
+                edge_weight = get_edge_weight(
+                    row['abs_freq'], df_show_threshold, log_min_edge_freq, log_max_edge_freq)
                 if row['dfg_id'] > 0:
                     edge_color, edge_font_color = get_medium_and_dark_color(True, 'resource', row['abs_freq'],
                                                                             df_show_threshold-1, dfg_id=int(row['dfg_id']))
@@ -344,8 +374,10 @@ class DFGVisualizer:
         for index, row in df_node_results_over.iterrows():
             node_id = str(row["n"])
             if node_id in node_ids:
-                _, node_fill_color = get_medium_and_dark_color(False, 'resource', row['abs_freq'], df_show_threshold, dfg_id=int(row['dfg_id']))
-                _, node_font_color = get_medium_and_dark_color(True, 'resource', row['abs_freq'], 0, dfg_id=int(row['dfg_id']))
+                _, node_fill_color = get_medium_and_dark_color(
+                    False, 'resource', row['abs_freq'], df_show_threshold, dfg_id=int(row['dfg_id']))
+                _, node_font_color = get_medium_and_dark_color(
+                    True, 'resource', row['abs_freq'], 0, dfg_id=int(row['dfg_id']))
                 # _, node_font_color = get_medium_and_dark_color(True, 'resource', row['abs_freq'], df_show_threshold, dfg_id=int(row['dfg_id']))
                 if node_id[:node_id.index('_')] == 'start':
                     node_description = f"<<b><FONT COLOR=\"black\">{resources_over[row['dfg_id']-1][0]}</FONT><br/>{node_id[:node_id.index('_')]}</b><br/><FONT COLOR=\"{node_font_color}\" POINT-SIZE=\"{str(font_size_small)}\">{int(row['abs_freq'])}</FONT>>"
@@ -353,7 +385,8 @@ class DFGVisualizer:
                     node_description = f"<<b>{node_id[:node_id.index('_')]}</b><br/><FONT COLOR=\"{node_font_color}\" POINT-SIZE=\"{str(font_size_small)}\">{int(row['abs_freq'])}</FONT>>"
                 else:
                     node_description = f"<<b>C{int(float(row['n'][:row['n'].index('_')]))}</b><br/><FONT COLOR=\"{node_font_color}\" POINT-SIZE=\"{str(font_size_small)}\">{int(row['abs_freq'])}</FONT>>"
-                dot.node(node_id, node_description, fillcolor=node_fill_color, fontcolor=node_font_color)
+                dot.node(node_id, node_description,
+                         fillcolor=node_fill_color, fontcolor=node_font_color)
         pr.record_performance('draw_nodes')
         return dot
 
@@ -368,20 +401,24 @@ class DFGVisualizer:
                  fontcolor=color_dict['grey']['dark'])
         grey_threshold = 300
 
-        node_results, log_min_node_freq, log_max_node_freq = query_inter_cluster_DFG_nodes_min_max(tx, cluster)
+        node_results, log_min_node_freq, log_max_node_freq = query_inter_cluster_DFG_nodes_min_max(
+            tx, cluster)
         edge_results, log_min_edge_freq, log_max_edge_freq = query_inter_cluster_DFG_edges_min_max(tx, cluster,
                                                                                                    grey_threshold)
-        start_node_results, end_node_results = query_inter_cluster_DFG_start_and_end(tx, cluster)
+        start_node_results, end_node_results = query_inter_cluster_DFG_start_and_end(
+            tx, cluster)
 
         start_count = 0
         for record in start_node_results:
-            edge_weight = get_edge_weight(int(record["freq"]), grey_threshold, log_min_edge_freq, log_max_edge_freq)
+            edge_weight = get_edge_weight(
+                int(record["freq"]), grey_threshold, log_min_edge_freq, log_max_edge_freq)
             if int(record["freq"]) <= grey_threshold:
                 dot.edge("start", record['start'], xlabel=str(record["freq"]), color=color_dict['grey']['light_grey'],
                          penwidth=f"{edge_weight}", fontcolor=color_dict['grey']['medium_grey'])
                 start_count += record["freq"]
             else:
-                dot.edge("start", record['start'], xlabel=str(record["freq"]), penwidth=f"{edge_weight}")
+                dot.edge("start", record['start'], xlabel=str(
+                    record["freq"]), penwidth=f"{edge_weight}")
                 start_count += record["freq"]
                 start_description = f"<<b>[start]</b><br/><FONT POINT-SIZE=\"{str(font_size_small)}\">{str(start_count)}</FONT>>"
         dot.node("start", start_description, node='source')
@@ -392,27 +429,32 @@ class DFGVisualizer:
             node_description = f"<<b>{action_abbr}</b><br/><FONT POINT-SIZE=\"{str(font_size_small)}\">{record['freq']}</FONT>>"
             node_fill_color, node_font_color = get_node_colors(int(record['freq']), log_min_node_freq,
                                                                log_max_node_freq)
-            dot.node(node_id, node_description, fillcolor=node_fill_color, fontcolor=node_font_color)
+            dot.node(node_id, node_description,
+                     fillcolor=node_fill_color, fontcolor=node_font_color)
 
         for record in edge_results:
             n1_id = record['e1_action']
             n2_id = record['e2_action']
-            edge_weight = get_edge_weight(int(record["freq"]), grey_threshold, log_min_edge_freq, log_max_edge_freq)
+            edge_weight = get_edge_weight(
+                int(record["freq"]), grey_threshold, log_min_edge_freq, log_max_edge_freq)
             if int(record["freq"]) <= grey_threshold:
                 dot.edge(n1_id, n2_id, xlabel=str(record["freq"]), color=color_dict['grey']['light_grey'],
                          penwidth=f"{edge_weight}", fontcolor=color_dict['grey']['medium_grey'])
             else:
-                dot.edge(n1_id, n2_id, xlabel=str(record["freq"]), penwidth=f"{edge_weight}")
+                dot.edge(n1_id, n2_id, xlabel=str(
+                    record["freq"]), penwidth=f"{edge_weight}")
 
         end_count = 0
         for record in end_node_results:
-            edge_weight = get_edge_weight(int(record["freq"]), grey_threshold, log_min_edge_freq, log_max_edge_freq)
+            edge_weight = get_edge_weight(
+                int(record["freq"]), grey_threshold, log_min_edge_freq, log_max_edge_freq)
             if int(record["freq"]) <= grey_threshold:
                 dot.edge(record['end'], "end", xlabel=str(record["freq"]), color=color_dict['grey']['light_grey'],
                          penwidth=f"{edge_weight}", fontcolor=color_dict['grey']['medium_grey'])
                 end_count += record["freq"]
             else:
-                dot.edge(record['end'], "end", xlabel=str(record["freq"]), penwidth=f"{edge_weight}")
+                dot.edge(record['end'], "end", xlabel=str(
+                    record["freq"]), penwidth=f"{edge_weight}")
                 end_count += record["freq"]
         end_description = f"<<b>[end]</b><br/><FONT POINT-SIZE=\"{str(font_size_small)}\">{str(end_count)}</FONT>>"
         dot.node("end", end_description, node='sink')
@@ -420,8 +462,10 @@ class DFGVisualizer:
 
     def get_edge_and_node_results_joint_cd_comparison(self, tx, entity_type, dfg_id, task_instance_ids_1,
                                                       task_instance_ids_2):
-        edge_results_1 = self.query_DFG_edges_absolute(tx, task_instance_ids_1, entity_type)
-        edge_results_2 = self.query_DFG_edges_absolute(tx, task_instance_ids_2, entity_type)
+        edge_results_1 = self.query_DFG_edges_absolute(
+            tx, task_instance_ids_1, entity_type)
+        edge_results_2 = self.query_DFG_edges_absolute(
+            tx, task_instance_ids_2, entity_type)
         start_edge_results_1, end_edge_results_1 = self \
             .query_DFG_start_and_end_absolute(tx, task_instance_ids_1, entity_type, dfg_id)
         start_edge_results_2, end_edge_results_2 = self \
@@ -430,12 +474,18 @@ class DFGVisualizer:
         edge_results_1.extend(end_edge_results_1)
         edge_results_2.extend(start_edge_results_2)
         edge_results_2.extend(end_edge_results_2)
-        df_edge_results_1 = pd.DataFrame([dict(record) for record in edge_results_1])
-        df_edge_results_1.rename(columns={'abs_freq': 'before_freq'}, inplace=True)
-        df_edge_results_2 = pd.DataFrame([dict(record) for record in edge_results_2])
-        df_edge_results_2.rename(columns={'abs_freq': 'after_freq'}, inplace=True)
-        df_edge_results_joint = pd.merge(df_edge_results_1, df_edge_results_2, on=['n1', 'n2'])
-        df_edge_results_joint['sum_freq'] = df_edge_results_joint['before_freq'] + df_edge_results_joint['after_freq']
+        df_edge_results_1 = pd.DataFrame(
+            [dict(record) for record in edge_results_1])
+        df_edge_results_1.rename(
+            columns={'abs_freq': 'before_freq'}, inplace=True)
+        df_edge_results_2 = pd.DataFrame(
+            [dict(record) for record in edge_results_2])
+        df_edge_results_2.rename(
+            columns={'abs_freq': 'after_freq'}, inplace=True)
+        df_edge_results_joint = pd.merge(
+            df_edge_results_1, df_edge_results_2, on=['n1', 'n2'])
+        df_edge_results_joint['sum_freq'] = df_edge_results_joint['before_freq'] + \
+            df_edge_results_joint['after_freq']
 
         nr_cases_before = 12208
         nr_cases_after = 14164
@@ -444,22 +494,29 @@ class DFGVisualizer:
         df_edge_results_joint['sum_percentage'] = df_edge_results_joint['before_percentage'] + df_edge_results_joint[
             'after_percentage']
         df_edge_results_joint['percentage_difference'] = df_edge_results_joint['after_percentage'] - \
-                                                         df_edge_results_joint['before_percentage']
+            df_edge_results_joint['before_percentage']
         # df_edge_results_joint['relative_percentage_difference'] = (df_edge_results_joint['after_percentage'] -
         #                                                            df_edge_results_joint['before_percentage']) / \
         #                                                           df_edge_results_joint['before_percentage']
         df_edge_results_joint['relative_percentage_difference'] = df_edge_results_joint['after_percentage'] / \
-                                                                  df_edge_results_joint['before_percentage']
-        df_edge_results_joint['abs_percentage_difference'] = abs(df_edge_results_joint['percentage_difference'])
-        df_edge_results_joint.sort_values(by=['sum_freq'], ascending=False, inplace=True)
+            df_edge_results_joint['before_percentage']
+        df_edge_results_joint['abs_percentage_difference'] = abs(
+            df_edge_results_joint['percentage_difference'])
+        df_edge_results_joint.sort_values(
+            by=['sum_freq'], ascending=False, inplace=True)
 
         node_results_1 = self.query_DFG_nodes_absolute(tx, task_instance_ids_1)
         node_results_2 = self.query_DFG_nodes_absolute(tx, task_instance_ids_2)
-        df_node_results_1 = pd.DataFrame([dict(record) for record in node_results_1])
-        df_node_results_1.rename(columns={'abs_freq': 'before_freq'}, inplace=True)
-        df_node_results_2 = pd.DataFrame([dict(record) for record in node_results_2])
-        df_node_results_2.rename(columns={'abs_freq': 'after_freq'}, inplace=True)
-        df_node_results_joint = pd.merge(df_node_results_1, df_node_results_2, on=['cluster'])
+        df_node_results_1 = pd.DataFrame(
+            [dict(record) for record in node_results_1])
+        df_node_results_1.rename(
+            columns={'abs_freq': 'before_freq'}, inplace=True)
+        df_node_results_2 = pd.DataFrame(
+            [dict(record) for record in node_results_2])
+        df_node_results_2.rename(
+            columns={'abs_freq': 'after_freq'}, inplace=True)
+        df_node_results_joint = pd.merge(
+            df_node_results_1, df_node_results_2, on=['cluster'])
         sum_start_before = sum(
             df_edge_results_joint[df_edge_results_joint['n1'] == f'start_{dfg_id}']['before_freq'].tolist())
         sum_start_after = sum(
@@ -468,23 +525,22 @@ class DFGVisualizer:
             df_edge_results_joint[df_edge_results_joint['n2'] == f'end_{dfg_id}']['before_freq'].tolist())
         sum_end_after = sum(
             df_edge_results_joint[df_edge_results_joint['n2'] == f'end_{dfg_id}']['after_freq'].tolist())
-        df_node_results_joint = df_node_results_joint.append(
-            {'cluster': f'start_{dfg_id}', 'before_freq': sum_start_before, 'after_freq': sum_start_after},
-            ignore_index=True)
-        df_node_results_joint = df_node_results_joint.append(
-            {'cluster': f'end_{dfg_id}', 'before_freq': sum_end_before, 'after_freq': sum_end_after}, ignore_index=True)
+        df_node_results_joint = pd.concat([df_node_results_joint, pd.DataFrame.from_records(
+            [{'cluster': f'start_{dfg_id}', 'before_freq': sum_start_before, 'after_freq': sum_start_after}])])
+        df_node_results_joint = pd.concat([df_node_results_joint, pd.DataFrame.from_records(
+            [{'cluster': f'end_{dfg_id}', 'before_freq': sum_end_before, 'after_freq': sum_end_after}])])
 
         df_node_results_joint['before_percentage'] = df_node_results_joint['before_freq'] / nr_cases_before
         df_node_results_joint['after_percentage'] = df_node_results_joint['after_freq'] / nr_cases_after
         df_node_results_joint['sum_percentage'] = df_node_results_joint['before_percentage'] + df_node_results_joint[
             'after_percentage']
         df_node_results_joint['percentage_difference'] = df_node_results_joint['after_percentage'] - \
-                                                         df_node_results_joint['before_percentage']
+            df_node_results_joint['before_percentage']
         # df_node_results_joint['relative_percentage_difference'] = (df_node_results_joint['after_percentage'] -
         #                                                            df_node_results_joint['before_percentage']) / \
         #                                                           df_node_results_joint['before_percentage']
         df_node_results_joint['relative_percentage_difference'] = df_node_results_joint['after_percentage'] / \
-                                                                  df_node_results_joint['before_percentage']
+            df_node_results_joint['before_percentage']
 
         return df_edge_results_joint, df_node_results_joint
 
@@ -493,10 +549,12 @@ class DFGVisualizer:
         for dfg_id in dfg_ids:
             edge_results = self.query_DFG_edges_absolute_resource_specific(tx, list_task_instance_ids[
                 dfg_ids.index(dfg_id)], entity_type)
-            df_edge_results = pd.DataFrame([dict(record) for record in edge_results])
+            df_edge_results = pd.DataFrame(
+                [dict(record) for record in edge_results])
             node_results = self.query_DFG_nodes_absolute_resource_specific(tx, list_task_instance_ids[
                 dfg_ids.index(dfg_id)])
-            df_node_results = pd.DataFrame([dict(record) for record in node_results])
+            df_node_results = pd.DataFrame(
+                [dict(record) for record in node_results])
             if include_start_end_nodes:
                 start_edge_results, end_edge_results = self.query_DFG_start_and_end_absolute_resource_specific(tx,
                                                                                                                list_task_instance_ids[
@@ -504,22 +562,30 @@ class DFGVisualizer:
                                                                                                                        dfg_id)],
                                                                                                                entity_type,
                                                                                                                dfg_id)
-                df_edge_results = df_edge_results.append(pd.DataFrame([dict(record) for record in start_edge_results]))
-                df_edge_results = df_edge_results.append(pd.DataFrame([dict(record) for record in end_edge_results]))
-                sum_start = sum(df_edge_results[df_edge_results['n1'] == f'start_{dfg_id}']['abs_freq'].tolist())
-                sum_end = sum(df_edge_results[df_edge_results['n2'] == f'end_{dfg_id}']['abs_freq'].tolist())
-                df_node_results = df_node_results.append({'n': f'start_{dfg_id}', 'abs_freq': sum_start},
-                                                         ignore_index=True)
-                df_node_results = df_node_results.append({'n': f'end_{dfg_id}', 'abs_freq': sum_end},
-                                                         ignore_index=True)
+                df_edge_results = pd.concat([df_edge_results, pd.DataFrame.from_records(
+                    [dict(record) for record in start_edge_results])])
+                df_edge_results = pd.concat([df_edge_results, pd.DataFrame.from_records(
+                    [dict(record) for record in end_edge_results])])
+                sum_start = sum(
+                    df_edge_results[df_edge_results['n1'] == f'start_{dfg_id}']['abs_freq'].tolist())
+                sum_end = sum(
+                    df_edge_results[df_edge_results['n2'] == f'end_{dfg_id}']['abs_freq'].tolist())
+
+                df_node_results = pd.concat([df_node_results, pd.DataFrame.from_records(
+                    [{'n': f'start_{dfg_id}', 'abs_freq': sum_start}])])
+                df_node_results = pd.concat([df_node_results, pd.DataFrame.from_records(
+                    [{'n': f'end_{dfg_id}', 'abs_freq': sum_end}])])
+
             df_edge_results['dfg_id'] = dfg_id
             df_node_results['dfg_id'] = dfg_id
             if dfg_ids.index(dfg_id) == 0:
                 df_edge_results_all = df_edge_results.copy()
                 df_node_results_all = df_node_results.copy()
             else:
-                df_edge_results_all = df_edge_results_all.append(df_edge_results)
-                df_node_results_all = df_node_results_all.append(df_node_results)
+                df_edge_results_all = pd.concat(
+                    [df_edge_results_all, df_edge_results])
+                df_node_results_all = pd.concat(
+                    [df_node_results_all, df_node_results])
         return df_edge_results_all, df_node_results_all
 
     def query_DFG_nodes_min_max_absolute(self, tx, task_instance_ids):
@@ -801,7 +867,8 @@ def get_task_instance_ids(tx, start_end_date=None, resources=None):
         task_instance_ids = filter_task_instances_time_frame(tx=tx, start_date=start_end_date[0],
                                                              end_date=start_end_date[1], ti_ids=task_instance_ids)
     if resources is not None:
-        task_instance_ids = filter_task_instances_resource(tx=tx, resources=resources, ti_ids=task_instance_ids)
+        task_instance_ids = filter_task_instances_resource(
+            tx=tx, resources=resources, ti_ids=task_instance_ids)
     return task_instance_ids
 
 
@@ -883,7 +950,8 @@ def get_medium_and_dark_color(overlaid, entity_type, edge_frequency, edge_weight
 def get_edge_cutoff(edge_frequencies, percentage):
     edge_frequencies = sorted(edge_frequencies, reverse=True)
     cum_sum_cut_off = percentage * sum(edge_frequencies)
-    index_cut_off = np.argwhere(np.cumsum(edge_frequencies) >= cum_sum_cut_off)[0][0]
+    index_cut_off = np.argwhere(
+        np.cumsum(edge_frequencies) >= cum_sum_cut_off)[0][0]
     cut_off = edge_frequencies[index_cut_off]
     return cut_off
 
@@ -899,7 +967,8 @@ def get_node_colors(node_freq, log_min_node_freq, log_max_node_freq):
     font_color = black
     c_map = cm.get_cmap('Greys')
     log_node_freq = np.log(node_freq)
-    log_node_freq_norm = (log_node_freq - log_min_node_freq) / (1.3 * (log_max_node_freq - log_min_node_freq))
+    log_node_freq_norm = (log_node_freq - log_min_node_freq) / \
+        (1.3 * (log_max_node_freq - log_min_node_freq))
     rgba = c_map(log_node_freq_norm)
     fill_color = mpl.colors.rgb2hex(rgba)
     if log_node_freq_norm > 0.5:
@@ -936,7 +1005,8 @@ def print_cmap(abs_max, min_perc_case_diff):
     norm = mpl.colors.Normalize(vmin=abs_max * -1.0, vmax=abs_max)
     im = cm.ScalarMappable(norm=norm, cmap=c_map)
     fig, ax = plt.subplots(1, 1)
-    ax.figure.colorbar(im, ax=ax, orientation='horizontal', format=FuncFormatter(lambda y, _: '{:.0%}'.format(y)))
+    ax.figure.colorbar(im, ax=ax, orientation='horizontal',
+                       format=FuncFormatter(lambda y, _: '{:.0%}'.format(y)))
     ax.axis('off')
     # plt.savefig('colorbar.svg', format='svg')
     plt.show()
@@ -944,7 +1014,8 @@ def print_cmap(abs_max, min_perc_case_diff):
 
 def get_edge_weight(frequency, threshold, log_min_edge_freq, log_max_edge_freq):
     edge_weight = np.log(max((threshold + 1), frequency))
-    edge_weight = (edge_weight - log_min_edge_freq) / (log_max_edge_freq - log_min_edge_freq) * 10
+    edge_weight = (edge_weight - log_min_edge_freq) / \
+        (log_max_edge_freq - log_min_edge_freq) * 10
     return edge_weight
 
 
