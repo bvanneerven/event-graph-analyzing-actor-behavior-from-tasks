@@ -24,28 +24,27 @@ ac = AnalysisConfigurator(pattern_subset_description)
 # -------------- CONSTRUCTION ----------------- #
 # IF STARTING FROM SCRATCH (without event graph constructed in neo4j)
 # (1) set "step_preprocess" and "step_create_event_graph" to true:
-step_preprocess = False
-step_create_event_graph = False
+step_preprocess = True
+step_create_event_graph = True
 # (2) create graph in Neo4j (with same password as specified in "graph_confs.py")
 #     and allocate enough memory: set dbms.memory.heap.max_size=20G
 # (3) specify path to import directory of neo4j database:
-path_to_neo4j_import_directory = 'C:\\Users\\s111402\\.Neo4jDesktop\\relate-data\dbmss\\' \
-                                 'dbms-7596d843-4d32-444d-87ff-5acea694caa3\\import\\'
+path_to_neo4j_import_directory = r'C:\Users\Bram\.Neo4jDesktop\relate-data\dbmss\dbms-d5acf54e-d8e1-421a-b4e0-7b887f3479cf\import'
 
 # IF STARTING FROM SCRATCH OR FROM AN EVENT GRAPH PRECONSTRUCTED:
 # set "step_construct_high_level_events" to true to construct high level events:
-step_construct_high_level_events = False
+step_construct_high_level_events = True
 
 # IF ALSO CREATING EVENT CLASS AND TASK INSTANCE CLASS CONSTRUCTS (necessary for analyzing atomic-composite granularity):
-step_construct_classes = False
+step_construct_classes = True
 
-step_construct_clusters = False
+step_construct_clusters = True
 
-step_construct_artificial = False
+step_construct_artificial = True
 
 # -------------- TASK ANALYSIS ---------------- #
 # IF EVENT GRAPH, HIGH LEVEL EVENTS, CLASS- AND CLUSTER CONSTRUCTS ARE ALREADY IN PLACE:
-step_create_intra_task_DFG = True
+step_create_intra_task_DFG = False
 
 step_create_DFG_clusters = False
 entity_type = 'case'
@@ -80,7 +79,8 @@ if step_construct_high_level_events:
         .construct_single()
 
 if step_construct_classes:
-    class_constr = ClassConstructor(gc.get_password(), graph, gc.get_entity_labels(), gc.get_action_lifecycle_labels())
+    class_constr = ClassConstructor(gc.get_password(
+    ), graph, gc.get_entity_labels(), gc.get_action_lifecycle_labels())
     class_constr.construct_action_classes()
 
 ta = TaskAnalyzer(graph, gc.get_password(), ac.get_analysis_directory(), ac.get_pattern_filter_description(),
@@ -99,7 +99,8 @@ if step_create_DFG_clusters:
 if step_create_intra_task_DFG:
     dfg_vis.visualize_intra_cluster_graph(14)
 if step_create_DFG_concept_drift_comparison:
-    dfg_vis.visualize_cluster_DFG_concept_drift_comparison(entity_type, df_show_threshold, start_end_dates)
+    dfg_vis.visualize_cluster_DFG_concept_drift_comparison(
+        entity_type, df_show_threshold, start_end_dates)
 if step_create_DFG_resource_overlaid:
     dfg_vis.visualize_cluster_DFG_resources(df_show_threshold_under, df_show_threshold_over, resources_lists_over,
                                             start_end_date=start_end_date, resources=resources)
