@@ -109,6 +109,7 @@ class ClusterConstructor:
             'connect_artificial_start_and_end_for_resource_perspective')
 
         pr.record_total_performance()
+        pr.save_to_file()
 
 
 def run_query(driver, query):

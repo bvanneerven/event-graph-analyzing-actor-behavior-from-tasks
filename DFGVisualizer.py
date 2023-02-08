@@ -150,7 +150,7 @@ class DFGVisualizer:
             view=True)
 
     def get_DFG(self, tx, dot, dfg_id, task_instance_ids, entity_type, df_show_threshold, print_description=False):
-        pr = PerformanceRecorder(self.graph, f'constructing_DFG')
+        pr = PerformanceRecorder(self.graph, f'constructing_cluster_DFG')
         font_size_large = 38
         font_size_small = 34
         # set default graph properties
@@ -225,6 +225,8 @@ class DFGVisualizer:
         dot.node(
             f"end_{dfg_id}", f"<<b>end</b><br/><FONT POINT-SIZE=\"{str(font_size_small)}\">{end_count}</FONT>>", node='sink')
         pr.record_performance("draw_nodes")
+        pr.record_total_performance()
+        pr.save_to_file()
         return dot
 
     def get_DFG_concept_drift_comparison(self, tx, dot, dfg_id, task_instance_ids_before, task_instance_ids_after,
@@ -320,7 +322,8 @@ class DFGVisualizer:
 
     def get_DFG_resources_overlaid(self, tx, dot, dfg_ids, list_task_instance_ids, df_show_threshold_case,
                                    df_show_threshold_resource, resources_over):
-        pr = PerformanceRecorder(self.graph, f'constructing_DFG')
+        pr = PerformanceRecorder(
+            self.graph, f'constructing_resources_overlaid_DFG')
         # set default graph properties
         font_size_large = 38
         font_size_small = 34
@@ -388,9 +391,14 @@ class DFGVisualizer:
                 dot.node(node_id, node_description,
                          fillcolor=node_fill_color, fontcolor=node_font_color)
         pr.record_performance('draw_nodes')
+
+        pr.record_total_performance()
+        pr.save_to_file()
+
         return dot
 
     def get_intra_cluster_DFG(self, tx, dot, cluster):
+        pr = PerformanceRecorder(self.graph, f'constructing_intra_cluster_DFG')
         # set default graph properties
         font_size_large = 38
         font_size_small = 34
@@ -407,6 +415,7 @@ class DFGVisualizer:
                                                                                                    grey_threshold)
         start_node_results, end_node_results = query_inter_cluster_DFG_start_and_end(
             tx, cluster)
+        pr.record_performance("query_nodes_and_edges")
 
         start_count = 0
         for record in start_node_results:
@@ -458,6 +467,12 @@ class DFGVisualizer:
                 end_count += record["freq"]
         end_description = f"<<b>[end]</b><br/><FONT POINT-SIZE=\"{str(font_size_small)}\">{str(end_count)}</FONT>>"
         dot.node("end", end_description, node='sink')
+
+        pr.record_performance("draw_nodes_and_edges")
+
+        pr.record_total_performance()
+        pr.save_to_file()
+
         return dot
 
     def get_edge_and_node_results_joint_cd_comparison(self, tx, entity_type, dfg_id, task_instance_ids_1,

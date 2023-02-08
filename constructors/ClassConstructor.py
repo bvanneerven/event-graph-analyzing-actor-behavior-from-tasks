@@ -66,6 +66,7 @@ class ClassConstructor:
             run_query(self.driver, query_aggregate_directly_follows_event_classes)
 
         pr.record_total_performance()
+        pr.save_to_file()
 
     def construct_task_instance_classes(self):
         # create performance recorder
@@ -104,6 +105,7 @@ class ClassConstructor:
             run_query(self.driver, query_aggregate_directly_follows_TI_classes)
 
         pr.record_total_performance()
+        pr.save_to_file()
 
 
 def run_query(driver, query):
